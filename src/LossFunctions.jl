@@ -91,6 +91,7 @@ function evaluator(
 end
 
 # Evaluate the loss of a particular expression on the input dataset.
+# TODO: FINISH THIS
 function eval_loss(
     tree::Node{T},
     dataset::Dataset{T,L},
@@ -98,14 +99,58 @@ function eval_loss(
     regularization::Bool=true,
     idx=nothing,
 )::L where {T<:DATA_TYPE,L<:LOSS_TYPE}
-    loss_val = if options.loss_function === nothing
-        _eval_loss(tree, dataset, options, regularization, idx)
-    else
-        f = options.loss_function::Function
-        evaluator(f, tree, dataset, options, idx)
-    end
 
-    return loss_val
+    prediction = zeros(0)
+    nfeatures = dataset.nfeatures
+    println("Start of Computation: ", nfeatures)
+    println(dataset.splits)
+    println(size(dataset.splits), typeof(dataset.splits))
+    for i=1:size(dataset.y,1)
+        println("i: ", i, " ", typeof(i))
+        pred = 0
+        start = Int64(dataset.splits[i,1])
+        stop = Int64(dataset.splits[i,2])
+        for j=start:stop
+            println("j: ", j, typeof(j))
+            pair = dataset.X[:, j*nfeatures:(j+1)*nfeatures]
+            println("pair: ", pair)
+            (pair_pred, _) = eval_tree_array(tree, pair, options)
+            pred += pair_pred
+
+        end
+        append!(prediction, pred)
+    end
+    return _loss(prediction, dataset.y, LOSS_TYPE)
+    # split_inds = Int(size(dataset.splits)[1])
+    # last_ind = 1
+    # for s in 1:split_inds
+    #     split = dataset.splits[s, :]
+    #     append!(ys, dataset.y[last_ind])
+    #     pair_pred = 0
+    #     inc = Int(split[1])
+    #     prediction_val = setup_eval_tree_slice_add(tree, dataset, options, inc, last_ind)
+    #     pair_pred += prediction_val
+    #     last_ind += inc
+    #     inc = Int(split[2])
+    #     prediction_val = setup_eval_tree_slice_add(tree, dataset, options, inc, last_ind)
+    #     pair_pred -= prediction_val
+    #
+    #     last_ind += inc
+    #     inc = Int(split[3])
+    #     prediction_val = setup_eval_tree_slice_add(tree, dataset, options, inc, last_ind)
+    #     pair_pred -= prediction_val
+    #     last_ind += inc
+    #     append!(prediction, pair_pred)
+    # end
+    # return loss(prediction, ys, options)
+    # loss_val = if options.loss_function === nothing
+    #     _eval_loss(tree, dataset, options, regularization, idx)
+    # else
+    #     f = options.loss_function::Function
+    #     evaluator(f, tree, dataset, options, idx)
+    # end
+
+    # return loss_val
 end
 
 function eval_loss_batched(
