@@ -56,6 +56,7 @@ mutable struct Dataset{
     L<:LOSS_TYPE,
     AX<:AbstractMatrix{T},
     AY<:Union{AbstractVector{T},Nothing},
+    ASplits<:Union{AbstractMatrix{T},Nothing},
     AW<:Union{AbstractVector{T},Nothing},
     NT<:NamedTuple,
     XU<:Union{AbstractVector{<:Quantity},Nothing},
@@ -65,6 +66,7 @@ mutable struct Dataset{
 }
     X::AX
     y::AY
+    splits::ASplits
     n::Int
     nfeatures::Int
     weighted::Bool
@@ -97,7 +99,8 @@ Construct a dataset to pass between internal functions.
 """
 function Dataset(
     X::AbstractMatrix{T},
-    y::Union{AbstractVector{T},Nothing}=nothing;
+    y::Union{AbstractVector{T},Nothing}=nothing,
+    splits::Union{AbstractMatrix{T},Nothing}=nothing;
     weights::Union{AbstractVector{T},Nothing}=nothing,
     variable_names::Union{Array{String,1},Nothing}=nothing,
     display_variable_names=variable_names,
@@ -114,7 +117,9 @@ function Dataset(
     # Deprecation warning:
     variable_names = deprecate_varmap(variable_names, varMap, :Dataset)
 
-    n = size(X, BATCH_DIM)
+    # n = size(X, BATCH_DIM)
+    n = size(y, 1)
+    println("n = $n")
     nfeatures = size(X, FEATURE_DIM)
     weighted = weights !== nothing
     variable_names = if variable_names === nothing
@@ -173,6 +178,7 @@ function Dataset(
         out_loss_type,
         typeof(X),
         typeof(y),
+        typeof(splits),
         typeof(weights),
         typeof(extra),
         typeof(X_si_units),
@@ -182,6 +188,7 @@ function Dataset(
     }(
         X,
         y,
+        splits,
         n,
         nfeatures,
         weighted,
@@ -201,7 +208,8 @@ function Dataset(
 end
 function Dataset(
     X::AbstractMatrix,
-    y::Union{<:AbstractVector,Nothing}=nothing;
+    y::Union{<:AbstractVector,Nothing}=nothing,
+    splits::Union{AbstractMatrix,Nothing}=nothing;
     weights::Union{<:AbstractVector,Nothing}=nothing,
     kws...,
 )
@@ -217,7 +225,7 @@ function Dataset(
     if weights !== nothing
         weights = Base.Fix1(convert, T).(weights)
     end
-    return Dataset(X, y; weights=weights, kws...)
+    return Dataset(X, y, splits; weights=weights, kws...)
 end
 
 function error_on_mismatched_size(_, ::Nothing)

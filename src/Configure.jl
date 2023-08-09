@@ -53,17 +53,18 @@ end
 function test_dataset_configuration(
     dataset::Dataset{T}, options::Options, verbosity
 ) where {T<:DATA_TYPE}
-    n = dataset.n
-    if n != size(dataset.X, 2) ||
-        (dataset.y !== nothing && n != size(dataset.y::AbstractArray{T}, 1))
-        throw(
-            AssertionError(
-                "Dataset dimensions are invalid. Make sure X is of shape [features, rows], y is of shape [rows] and if there are weights, they are of shape [rows].",
-            ),
-        )
-    end
+    # TODO: compute based on splits
+    # n = dataset.n
+    # if n != size(dataset.X, 2) ||
+    # if (dataset.y !== nothing && n != size(dataset.y::AbstractArray{T}, 1))
+    #     throw(
+    #         AssertionError(
+    #             "Dataset dimensions are invalid. Make sure X is of shape [features, rows], y is of shape [rows] and if there are weights, they are of shape [rows].",
+    #         ),
+    #     )
+    # end
 
-    if size(dataset.X, 2) > 10000
+    if size(dataset.y, 1) > 10000
         if !options.batching
             debug(
                 verbosity > 0,

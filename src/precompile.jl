@@ -38,6 +38,7 @@ function do_precompilation(::Val{mode}) where {mode}
             N = 30
             X = randn(T, 3, N)
             y = start ? randn(T, N) : randn(T, nout, N)
+            splits = randn(T, 2, N)
             @maybe_compile_workload mode begin
                 options = SymbolicRegression.Options(;
                     binary_operators=[+, *, /, -, ^],
@@ -64,7 +65,8 @@ function do_precompilation(::Val{mode}) where {mode}
                 )
                 state = equation_search(
                     X,
-                    y;
+                    y,
+                    splits;
                     niterations=start ? 3 : 1,
                     options=options,
                     parallelism=:multithreading,
@@ -72,7 +74,8 @@ function do_precompilation(::Val{mode}) where {mode}
                 )
                 hof = equation_search(
                     X,
-                    y;
+                    y,
+                    splits;
                     niterations=0,
                     options=options,
                     parallelism=:multithreading,

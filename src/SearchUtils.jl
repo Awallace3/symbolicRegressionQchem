@@ -307,6 +307,7 @@ load_saved_population(::Nothing; kws...) = nothing
 function construct_datasets(
     X,
     y,
+    splits,
     weights,
     variable_names,
     display_variable_names,
@@ -319,7 +320,8 @@ function construct_datasets(
     return [
         Dataset(
             X,
-            y[j, :];
+            y[j, :],
+            splits;
             weights=(weights === nothing ? weights : weights[j, :]),
             variable_names=variable_names,
             display_variable_names=display_variable_names,
