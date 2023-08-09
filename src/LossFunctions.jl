@@ -108,8 +108,8 @@ function eval_loss(
     for i=1:size(dataset.y,1)
         println("i: ", i, " ", typeof(i))
         pred = 0
-        start = Int64(dataset.splits[i,1])
-        stop = Int64(dataset.splits[i,2])
+        start = Int64(dataset.splits[i,1]) + 1
+        stop = Int64(dataset.splits[i,2]) + 1
         for j=start:stop
             println("j: ", j, typeof(j))
             pair = dataset.X[:, j*nfeatures:(j+1)*nfeatures]
