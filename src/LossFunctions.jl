@@ -71,6 +71,44 @@ end
 #
 #     return loss_val
 # end
+function _eval_loss(
+    tree::Node{T}, dataset::Dataset{T,L}, options::Options, regularization::Bool, idx
+)::L where {T<:DATA_TYPE,L<:LOSS_TYPE}
+    prediction = zeros(0)
+    for i in 1:size(dataset.y, 1)
+        pred = 0
+        start = Int64(dataset.splits[i, 1]) + 1
+        stop = Int64(dataset.splits[i, 2])
+        pair = maybe_getindex(dataset.X[:, start:stop], :, idx)
+        (predictions, completion) = eval_tree_array(
+            tree, pair, options
+        )
+        if !completion
+            return L(Inf)
+        end
+        for j in 1:size(predictions, 1)
+            pred += predictions[j]
+        end
+        append!(prediction, pred)
+    end
+
+    loss_val = if dataset.weighted
+        _weighted_loss(
+            prediction,
+            maybe_getindex(dataset.y, idx),
+            maybe_getindex(dataset.weights, idx),
+            options.elementwise_loss,
+        )
+    else
+        _loss(prediction, maybe_getindex(dataset.y, idx), options.elementwise_loss)
+    end
+
+    if regularization
+        loss_val += dimensional_regularization(tree, dataset, options)
+    end
+
+    return loss_val
+end
 # Triple loop, error
 # ERROR: LoadError: MethodError: no method matching eval_tree_array(::Node{Float64}, ::Vector{Float64}, ::DynamicExp
 # ressions.OperatorEnumModule.OperatorEnum; turbo::Bool)
@@ -127,57 +165,56 @@ end
 #
 #     return loss_val
 # end
-function _eval_loss(
-    tree::Node{T}, dataset::Dataset{T,L}, options::Options, regularization::Bool, idx
-)::L where {T<:DATA_TYPE,L<:LOSS_TYPE}
-    prediction = zeros(0)
-    nfeatures = dataset.nfeatures
-    println("Start of Computation: ", nfeatures)
-    println(dataset.splits)
-    println(size(dataset.splits), typeof(dataset.splits))
-    for i in 1:size(dataset.y, 1)
-        println("i: ", i, " ", typeof(i))
-        pred1 = 0
-        start = Int64(dataset.splits[i, 1]) + 1
-        stop = Int64(dataset.splits[i, 2]) + 1
-        # for j in start:stop
-        # println("j: ", j, typeof(j))
-        # pair = dataset.X[:, (j * nfeatures):((j + 1) * nfeatures)]
-        # pair = dataset.X[:, start:stop]
-        pair = dataset.X[:, 1:10]
-        println("eval_loss")
-        println("start: ", start, " ", "stop: ", stop)
-        println("pair: ", pair, " ", typeof(pair), size(pair))
-        println("tree: ", tree)
-        println("idx: ", idx)
-        println("options: ", options)
-        println("pair: ", pair, " ", typeof(pair))
-        (pair_pred, completion) = eval_tree_array(tree, pair, options)
-        if !completion
-            return L(Inf)
-        end
-        pred1 += pair_pred
-        # end
-        append!(prediction, pred1)
-    end
-
-    loss_val = if dataset.weighted
-        _weighted_loss(
-            prediction,
-            maybe_getindex(dataset.y, idx),
-            maybe_getindex(dataset.weights, idx),
-            options.elementwise_loss,
-        )
-    else
-        _loss(prediction, maybe_getindex(dataset.y, idx), options.elementwise_loss)
-    end
-
-    if regularization
-        loss_val += dimensional_regularization(tree, dataset, options)
-    end
-
-    return loss_val
-end
+# function _eval_loss(
+#     tree::Node{T}, dataset::Dataset{T,L}, options::Options, regularization::Bool, idx
+# )::L where {T<:DATA_TYPE,L<:LOSS_TYPE}
+#     prediction = zeros(0)
+#     nfeatures = dataset.nfeatures
+#     println("Start of Computation: ", nfeatures)
+#     println(dataset.splits)
+#     println(size(dataset.splits), typeof(dataset.splits))
+#     for i in 1:size(dataset.y, 1)
+#         println("i: ", i, " ", typeof(i))
+#         pred1 = 0
+#         start = Int64(dataset.splits[i, 1]) + 1
+#         stop = Int64(dataset.splits[i, 2]) + 1
+#         # for j in start:stop
+#         # println("j: ", j, typeof(j))
+#         # pair = dataset.X[:, (j * nfeatures):((j + 1) * nfeatures)]
+#         # pair = dataset.X[:, start:stop]
+#         pair = dataset.X[:, 1:10]
+#         println("eval_loss")
+#         println("start: ", start, " ", "stop: ", stop)
+#         println("pair: ", pair, " ", typeof(pair), size(pair))
+#         println("tree: ", tree)
+#         println("idx: ", idx)
+#         println("options: ", options)
+#         (pair_pred, completion) = eval_tree_array(tree, pair, options)
+#         if !completion
+#             return L(Inf)
+#         end
+#         pred1 += pair_pred
+#         # end
+#         append!(prediction, pred1)
+#     end
+#
+#     loss_val = if dataset.weighted
+#         _weighted_loss(
+#             prediction,
+#             maybe_getindex(dataset.y, idx),
+#             maybe_getindex(dataset.weights, idx),
+#             options.elementwise_loss,
+#         )
+#     else
+#         _loss(prediction, maybe_getindex(dataset.y, idx), options.elementwise_loss)
+#     end
+#
+#     if regularization
+#         loss_val += dimensional_regularization(tree, dataset, options)
+#     end
+#
+#     return loss_val
+# end
 
 # This evaluates function F:
 function evaluator(

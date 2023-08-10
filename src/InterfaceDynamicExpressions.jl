@@ -54,7 +54,6 @@ which speed up evaluation significantly.
     to the equation.
 """
 function eval_tree_array(tree::Node, X::AbstractArray, options::Options; kws...)
-    println("eval_tree_array 1")
     return eval_tree_array(tree, X, options.operators; turbo=options.turbo, kws...)
 end
 
