@@ -140,23 +140,24 @@ function _eval_loss(
         pred1 = 0
         start = Int64(dataset.splits[i, 1]) + 1
         stop = Int64(dataset.splits[i, 2]) + 1
+        # for j in start:stop
+        # println("j: ", j, typeof(j))
+        # pair = dataset.X[:, (j * nfeatures):((j + 1) * nfeatures)]
+        # pair = dataset.X[:, start:stop]
+        pair = dataset.X[:, 1:10]
+        println("eval_loss")
         println("start: ", start, " ", "stop: ", stop)
-        for j in start:stop
-            println("j: ", j, typeof(j))
-            pair = dataset.X[:, (j * nfeatures):((j + 1) * nfeatures)]
-            println("eval_loss")
-            println("tree: ", tree)
-            println("pair: ", pair, " ", typeof(pair), sizeof(pair))
-            println("idx: ", idx)
-            println("options: ", options)
-            println("maybe_getindex: ", maybe_getindex(pair, :, idx))
-            println("pair: ", pair, " ", typeof(pair))
-            (pair_pred, completion) = eval_tree_array(tree, maybe_getindex(pair, :, idx), options)
-            if !completion
-                return L(Inf)
-            end
-            pred1 += pair_pred
+        println("pair: ", pair, " ", typeof(pair), size(pair))
+        println("tree: ", tree)
+        println("idx: ", idx)
+        println("options: ", options)
+        println("pair: ", pair, " ", typeof(pair))
+        (pair_pred, completion) = eval_tree_array(tree, pair, options)
+        if !completion
+            return L(Inf)
         end
+        pred1 += pair_pred
+        # end
         append!(prediction, pred1)
     end
 
