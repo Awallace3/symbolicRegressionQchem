@@ -16,14 +16,14 @@ function debug_inline(verbosity, string...)
     end
 end
 
-pseudo_time = 0
+const pseudo_time = Ref(0)
 
 function get_birth_order(; deterministic=false)::Int
     """deterministic gives a birth time with perfect resolution, but is not thread safe."""
     if deterministic
         global pseudo_time
-        pseudo_time += 1
-        return pseudo_time
+        pseudo_time[] += 1
+        return pseudo_time[]
     else
         resolution = 1e7
         return round(Int, resolution * time())
@@ -43,7 +43,7 @@ recursive_merge(x...) = x[end]
 recursive_merge() = error("Unexpected input.")
 
 const subscripts = ('₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉')
-function subscriptify(number::Int)
+function subscriptify(number::Integer)
     return join([subscripts[i + 1] for i in reverse(digits(number))])
 end
 
@@ -76,14 +76,14 @@ mutable struct MutableTuple{S,T,N} <: AbstractVector{T}
     MutableTuple(::Val{_S}, ::Type{_T}, data::_N) where {_S,_T,_N} = new{_S,_T,_N}(data)
 end
 @inline Base.eltype(::MutableTuple{S,T}) where {S,T} = T
-Base.@propagate_inbounds function Base.getindex(v::MutableTuple, i::Int)
+Base.@propagate_inbounds function Base.getindex(v::MutableTuple, i::Integer)
     T = eltype(v)
     # Trick from MArray.jl
     return GC.@preserve v unsafe_load(
         Base.unsafe_convert(Ptr{T}, pointer_from_objref(v)), i
     )
 end
-Base.@propagate_inbounds function Base.setindex!(v::MutableTuple, x, i::Int)
+Base.@propagate_inbounds function Base.setindex!(v::MutableTuple, x, i::Integer)
     T = eltype(v)
     GC.@preserve v unsafe_store!(Base.unsafe_convert(Ptr{T}, pointer_from_objref(v)), x, i)
     return x
