@@ -76,12 +76,10 @@ function _eval_loss(
     prediction = zeros(0)
     for i in 1:size(dataset.y, 1)
         pred = 0
-        start = Int64(dataset.splits[i, 1]) + 1
-        stop = Int64(dataset.splits[i, 2])
+        start = Int64(dataset.splits[i, 1])
+        stop = Int64(dataset.splits[i, 2]) - 1
         pair = maybe_getindex(dataset.X[:, start:stop], :, idx)
-        (predictions, completion) = eval_tree_array(
-            tree, pair, options
-        )
+        (predictions, completion) = eval_tree_array(tree, pair, options)
         if !completion
             return L(Inf)
         end
@@ -243,27 +241,6 @@ function eval_loss(
     regularization::Bool=true,
     idx=nothing,
 )::L where {T<:DATA_TYPE,L<:LOSS_TYPE}
-    # prediction = zeros(0)
-    # nfeatures = dataset.nfeatures
-    # println("Start of Computation: ", nfeatures)
-    # println(dataset.splits)
-    # println(size(dataset.splits), typeof(dataset.splits))
-    # for i in 1:size(dataset.y, 1)
-    #     println("i: ", i, " ", typeof(i))
-    #     pred = 0
-    #     start = Int64(dataset.splits[i, 1]) + 1
-    #     stop = Int64(dataset.splits[i, 2]) + 1
-    #     for j in start:stop
-    #         println("j: ", j, typeof(j))
-    #         pair = dataset.X[:, (j * nfeatures):((j + 1) * nfeatures)]
-    #         println("pair: ", pair, " ", typeof(pair))
-    #         (pair_pred, _) = eval_tree_array(tree, maybe_getindex(pair, :, idx), options)
-    #         # (pair_pred, _) = eval_tree_array(tree, pair, options)
-    #         pred += pair_pred
-    #     end
-    #     append!(prediction, pred)
-    # end
-    # return _loss(prediction, dataset.y, LOSS_TYPE)
     loss_val = if options.loss_function === nothing
         _eval_loss(tree, dataset, options, regularization, idx)
     else
