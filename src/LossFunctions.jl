@@ -76,7 +76,7 @@ function _eval_loss(
     prediction = zeros(0)
     for i in 1:size(dataset.y, 1)
         pred = 0
-        start = Int64(dataset.splits[i, 1]) + 1
+        start = Int64(dataset.splits[i, 1])
         stop = Int64(dataset.splits[i, 2])
         pair = maybe_getindex(dataset.X[:, start:stop], :, idx)
         (predictions, completion) = eval_tree_array(
