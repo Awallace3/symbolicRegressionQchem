@@ -330,7 +330,8 @@ which is useful for debugging and profiling.
 function equation_search(
     X::AbstractMatrix{T},
     y::AbstractMatrix{T},
-    splits::AbstractMatrix{T};
+    splits::AbstractMatrix{T},
+    constants::AbstractMatrix{T};
     niterations::Int=10,
     weights::Union{AbstractMatrix{T},AbstractVector{T},Nothing}=nothing,
     options::Options=Options(),
@@ -375,6 +376,7 @@ function equation_search(
         X,
         y,
         splits,
+        constants,
         weights,
         variable_names,
         display_variable_names,
@@ -402,21 +404,37 @@ function equation_search(
 end
 
 function equation_search(
-    X::AbstractMatrix{T1}, y::AbstractMatrix{T2}, splits::AbstractMatrix{T3}; kw...
+    X::AbstractMatrix{T1},
+    y::AbstractMatrix{T2},
+    splits::AbstractMatrix{T3},
+    constants::AbstractMatrix{T2};
+    kw...,
 ) where {T1<:DATA_TYPE,T2<:DATA_TYPE,T3<:DATA_TYPE}
     U = promote_type(T1, T2, T3)
     return equation_search(
         convert(AbstractMatrix{U}, X),
         convert(AbstractMatrix{U}, y),
-        convert(AbstractMatrix{U}, splits);
+        convert(AbstractMatrix{U}, splits),
+        convert(AbstractMatrix{U}, constants);
         kw...,
     )
 end
 
 function equation_search(
-    X::AbstractMatrix{T1}, y::AbstractVector{T2}, splits::AbstractMatrix{T3}; kw...
+    X::AbstractMatrix{T1},
+    y::AbstractVector{T2},
+    splits::AbstractMatrix{T3},
+    constants::AbstractVector{T2};
+    kw...,
 ) where {T1<:DATA_TYPE,T2<:DATA_TYPE,T3<:DATA_TYPE}
-    return equation_search(X, reshape(y, (1, size(y, 1))), splits; kw..., v_dim_out=Val(1))
+    return equation_search(
+        X,
+        reshape(y, (1, size(y, 1))),
+        splits,
+        reshape(constants, (1, size(constants, 1)));
+        kw...,
+        v_dim_out=Val(1),
+    )
 end
 
 function equation_search(dataset::Dataset; kws...)

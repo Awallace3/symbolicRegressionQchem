@@ -57,6 +57,7 @@ mutable struct Dataset{
     AX<:AbstractMatrix{T},
     AY<:Union{AbstractVector{T},Nothing},
     ASplits<:Union{AbstractMatrix{T},Nothing},
+    AConstants<:Union{AbstractVector{T},Nothing},
     AW<:Union{AbstractVector{T},Nothing},
     NT<:NamedTuple,
     XU<:Union{AbstractVector{<:Quantity},Nothing},
@@ -67,6 +68,7 @@ mutable struct Dataset{
     X::AX
     y::AY
     splits::ASplits
+    constants::AConstants
     n::Int
     nfeatures::Int
     weighted::Bool
@@ -100,7 +102,8 @@ Construct a dataset to pass between internal functions.
 function Dataset(
     X::AbstractMatrix{T},
     y::Union{AbstractVector{T},Nothing}=nothing,
-    splits::Union{AbstractMatrix{T},Nothing}=nothing;
+    splits::Union{AbstractMatrix{T},Nothing}=nothing,
+    constants::Union{AbstractVector{T},Nothing}=nothing;
     weights::Union{AbstractVector{T},Nothing}=nothing,
     variable_names::Union{Array{String,1},Nothing}=nothing,
     display_variable_names=variable_names,
@@ -179,6 +182,7 @@ function Dataset(
         typeof(X),
         typeof(y),
         typeof(splits),
+        typeof(constants),
         typeof(weights),
         typeof(extra),
         typeof(X_si_units),
@@ -189,6 +193,7 @@ function Dataset(
         X,
         y,
         splits,
+        constants,
         n,
         nfeatures,
         weighted,
@@ -209,7 +214,8 @@ end
 function Dataset(
     X::AbstractMatrix,
     y::Union{<:AbstractVector,Nothing}=nothing,
-    splits::Union{AbstractMatrix,Nothing}=nothing;
+    splits::Union{AbstractMatrix,Nothing}=nothing,
+    constants::Union{<:AbstractVector,Nothing}=nothing;
     weights::Union{<:AbstractVector,Nothing}=nothing,
     kws...,
 )
@@ -225,7 +231,7 @@ function Dataset(
     if weights !== nothing
         weights = Base.Fix1(convert, T).(weights)
     end
-    return Dataset(X, y, splits; weights=weights, kws...)
+    return Dataset(X, y, splits, constants; weights=weights, kws...)
 end
 
 function error_on_mismatched_size(_, ::Nothing)
