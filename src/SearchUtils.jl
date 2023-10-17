@@ -316,6 +316,7 @@ function construct_datasets(
     X_units,
     y_units,
     loss_type,
+    divide_nfeatures,
 )
     nout = size(y, 1)
     return [
@@ -327,6 +328,7 @@ function construct_datasets(
             weights=(weights === nothing ? weights : weights[j, :]),
             variable_names=variable_names,
             display_variable_names=display_variable_names,
+            divide_nfeatures=divide_nfeatures,
             y_variable_name=if y_variable_names === nothing
                 if nout > 1
                     "y$(subscriptify(j))"

@@ -384,6 +384,7 @@ function equation_search(
         X_units,
         y_units,
         loss_type,
+        options.divide_nfeatures,
     )
 
     return equation_search(

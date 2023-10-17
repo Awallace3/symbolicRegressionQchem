@@ -114,6 +114,7 @@ function Dataset(
     y_units=nothing,
     # Deprecated:
     varMap=nothing,
+    divide_nfeatures=1,
 ) where {T<:DATA_TYPE,Linit}
     Base.require_one_based_indexing(X)
     y !== nothing && Base.require_one_based_indexing(y)
@@ -122,8 +123,11 @@ function Dataset(
 
     # n = size(X, BATCH_DIM)
     n = size(y, 1)
-    println("n = $n")
+    # println("n = $n")
     nfeatures = size(X, FEATURE_DIM)
+    # println("nfeatures = $nfeatures")
+    nfeatures  = Int64(nfeatures / divide_nfeatures)
+    println("nfeatures = $nfeatures")
     weighted = weights !== nothing
     variable_names = if variable_names === nothing
         ["x$(i)" for i in 1:nfeatures]

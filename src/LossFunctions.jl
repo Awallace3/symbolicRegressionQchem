@@ -43,51 +43,14 @@ end
 
 # Evaluate the loss of a particular expression on the input dataset.
 # ORIGINAL
-# function _eval_loss(
-#     tree::Node{T}, dataset::Dataset{T,L}, options::Options, regularization::Bool, idx
-# )::L where {T<:DATA_TYPE,L<:LOSS_TYPE}
-#     (prediction, completion) = eval_tree_array(
-#         tree, maybe_getindex(dataset.X, :, idx), options
-#     )
-#     if !completion
-#         return L(Inf)
-#     end
-#
-#     loss_val = if dataset.weighted
-#         _weighted_loss(
-#             prediction,
-#             maybe_getindex(dataset.y, idx),
-#             maybe_getindex(dataset.weights, idx),
-#             options.elementwise_loss,
-#         )
-#     else
-#         _loss(prediction, maybe_getindex(dataset.y, idx), options.elementwise_loss)
-#     end
-#
-#     if regularization
-#         loss_val += dimensional_regularization(tree, dataset, options)
-#     end
-#
-#     return loss_val
-# end
 function _eval_loss(
     tree::Node{T}, dataset::Dataset{T,L}, options::Options, regularization::Bool, idx
 )::L where {T<:DATA_TYPE,L<:LOSS_TYPE}
-    prediction = zeros(0)
-    for i in 1:size(dataset.y, 1)
-        pred = 0
-        start = Int64(dataset.splits[i, 1])
-        stop = Int64(dataset.splits[i, 2])
-        pair = maybe_getindex(dataset.X[:, start:stop], :, idx)
-        (predictions, completion) = eval_tree_array(tree, pair, options)
-        if !completion
-            return L(Inf)
-        end
-        for j in 1:size(predictions, 1)
-            pred += predictions[j] * dataset.constants[start]
-            start += 1
-        end
-        append!(prediction, pred)
+    (prediction, completion) = eval_tree_array(
+        tree, maybe_getindex(dataset.X, :, idx), options
+    )
+    if !completion
+        return L(Inf)
     end
 
     loss_val = if dataset.weighted
@@ -107,6 +70,43 @@ function _eval_loss(
 
     return loss_val
 end
+# function _eval_loss(
+#     tree::Node{T}, dataset::Dataset{T,L}, options::Options, regularization::Bool, idx
+# )::L where {T<:DATA_TYPE,L<:LOSS_TYPE}
+#     prediction = zeros(0)
+#     for i in 1:size(dataset.y, 1)
+#         pred = 0
+#         start = Int64(dataset.splits[i, 1])
+#         stop = Int64(dataset.splits[i, 2])
+#         pair = maybe_getindex(dataset.X[:, start:stop], :, idx)
+#         (predictions, completion) = eval_tree_array(tree, pair, options)
+#         if !completion
+#             return L(Inf)
+#         end
+#         for j in 1:size(predictions, 1)
+#             pred += predictions[j] * dataset.constants[start]
+#             start += 1
+#         end
+#         append!(prediction, pred)
+#     end
+#
+#     loss_val = if dataset.weighted
+#         _weighted_loss(
+#             prediction,
+#             maybe_getindex(dataset.y, idx),
+#             maybe_getindex(dataset.weights, idx),
+#             options.elementwise_loss,
+#         )
+#     else
+#         _loss(prediction, maybe_getindex(dataset.y, idx), options.elementwise_loss)
+#     end
+#
+#     if regularization
+#         loss_val += dimensional_regularization(tree, dataset, options)
+#     end
+#
+#     return loss_val
+# end
 
 # This evaluates function F:
 function evaluator(

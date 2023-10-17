@@ -426,6 +426,7 @@ function Options end
     fast_cycle::Bool=false,
     npopulations::Union{Nothing,Integer}=nothing,
     npop::Union{Nothing,Integer}=nothing,
+    divide_nfeatures::Union{Integer,Nothing}=1,
     kws...,
 ) where {use_recorder}
     for k in keys(kws)
@@ -796,6 +797,7 @@ function Options end
         nested_constraints,
         deterministic,
         define_helper_functions,
+        divide_nfeatures,
     )
 
     return options
