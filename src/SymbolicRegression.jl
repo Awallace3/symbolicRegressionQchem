@@ -408,7 +408,7 @@ function equation_search(
     X::AbstractMatrix{T1},
     y::AbstractMatrix{T2},
     splits::AbstractMatrix{T3},
-    constants::AbstractMatrix{T2};
+    constants::AbstractMatrix{T1};
     kw...,
 ) where {T1<:DATA_TYPE,T2<:DATA_TYPE,T3<:DATA_TYPE}
     U = promote_type(T1, T2, T3)
@@ -425,14 +425,15 @@ function equation_search(
     X::AbstractMatrix{T1},
     y::AbstractVector{T2},
     splits::AbstractMatrix{T3},
-    constants::AbstractVector{T2};
+    constants::AbstractMatrix{T1};
     kw...,
 ) where {T1<:DATA_TYPE,T2<:DATA_TYPE,T3<:DATA_TYPE}
     return equation_search(
         X,
         reshape(y, (1, size(y, 1))),
         splits,
-        reshape(constants, (1, size(constants, 1)));
+        # reshape(constants, (1, size(constants, 1)));
+        constants;
         kw...,
         v_dim_out=Val(1),
     )

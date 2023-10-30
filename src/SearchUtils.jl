@@ -324,7 +324,8 @@ function construct_datasets(
             X,
             y[j, :],
             splits,
-            constants[j, :];
+            # constants[j, :];
+            constants;
             weights=(weights === nothing ? weights : weights[j, :]),
             variable_names=variable_names,
             display_variable_names=display_variable_names,

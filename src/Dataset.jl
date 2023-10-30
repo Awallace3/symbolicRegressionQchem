@@ -57,7 +57,7 @@ mutable struct Dataset{
     AX<:AbstractMatrix{T},
     AY<:Union{AbstractVector{T},Nothing},
     ASplits<:Union{AbstractMatrix{T},Nothing},
-    AConstants<:Union{AbstractVector{T},Nothing},
+    AConstants<:Union{AbstractMatrix{T},Nothing},
     AW<:Union{AbstractVector{T},Nothing},
     NT<:NamedTuple,
     XU<:Union{AbstractVector{<:Quantity},Nothing},
@@ -103,7 +103,7 @@ function Dataset(
     X::AbstractMatrix{T},
     y::Union{AbstractVector{T},Nothing}=nothing,
     splits::Union{AbstractMatrix{T},Nothing}=nothing,
-    constants::Union{AbstractVector{T},Nothing}=nothing;
+    constants::Union{AbstractMatrix{T},Nothing}=nothing;
     weights::Union{AbstractVector{T},Nothing}=nothing,
     variable_names::Union{Array{String,1},Nothing}=nothing,
     display_variable_names=variable_names,
@@ -219,7 +219,7 @@ function Dataset(
     X::AbstractMatrix,
     y::Union{<:AbstractVector,Nothing}=nothing,
     splits::Union{AbstractMatrix,Nothing}=nothing,
-    constants::Union{<:AbstractVector,Nothing}=nothing;
+    constants::Union{<:AbstractMatrix,Nothing}=nothing;
     weights::Union{<:AbstractVector,Nothing}=nothing,
     kws...,
 )
